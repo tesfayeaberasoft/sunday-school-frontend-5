@@ -1,3 +1,4 @@
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { CalendarCheck, KeyRound, Pencil, UserCheck, UserPlus, UserX } from "lucide-react";
@@ -223,7 +224,8 @@ export function StudentProfile({ id, embedded = false }: { id: string; embedded?
 
   return (
     <div className="min-w-0 space-y-5">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <UserAvatar user={st} className="h-20 w-20 text-2xl" />
         <span className="rounded-full bg-muted px-2.5 py-0.5 font-mono text-xs text-navy">{st.code}</span>
         <StatusBadge status={st.status} label={s[st.status]} />
         {edit && (

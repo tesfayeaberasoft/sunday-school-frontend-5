@@ -70,6 +70,7 @@ export interface Student {
   guardianPhone: string;
   guardianRelation: string;
   photoConsent: boolean;
+  photoUrl?: string;
   classId: string;
   status: StudentStatus;
   joinDate: string;

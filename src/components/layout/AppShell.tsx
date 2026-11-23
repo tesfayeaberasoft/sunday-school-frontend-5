@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronsLeft, ChevronsRight, CloudOff, LayoutGrid, RefreshCw, X } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, CloudOff, LayoutGrid, LogOut, RefreshCw, X } from "lucide-react";
 import { Drawer as Vaul } from "vaul";
 import { toast } from "sonner";
 import { Logo, LogoMark } from "@/components/brand/Logo";
 import { NotificationBell } from "./NotificationBell";
 import { SyncDrawer } from "./SyncDrawer";
-import { UserMenu } from "./UserMenu";
+import { UserMenu, useAskLogout } from "./UserMenu";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { NAV, navFor, primaryNavFor, type NavItem } from "./nav-config";
 import { useCurrentUser } from "@/hooks/use-session";
 import { useOnline } from "@/hooks/use-online";
@@ -160,6 +161,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isActive = useActive();
   const items = navFor(user?.role);
   const primary = primaryNavFor(user?.role);
+  const signOut = useAskLogout();
+  const wide = !collapsed;
 
   useEffect(() => {
     void loadQueue();
@@ -195,6 +198,43 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex-1 overflow-y-auto px-3 py-4 no-scrollbar">
           <SidebarLinks items={items} collapsed={collapsed} />
         </div>
+        {user && (
+          <div className="shrink-0 space-y-1 border-t border-sidebar-border px-3 py-3">
+            <Link
+              to="/profile"
+              title={t.shell.profileShort}
+              aria-label={t.shell.profileShort}
+              className={cn(
+                "tap flex min-h-11 items-center justify-center gap-3 rounded-xl px-2 transition-colors hover:bg-sidebar-accent",
+                wide && "lg:justify-start",
+              )}
+              activeProps={{ className: "bg-sidebar-accent" }}
+            >
+              <UserAvatar user={user} className="h-9 w-9" />
+              {wide && (
+                <span className="hidden min-w-0 leading-tight lg:block">
+                  <span className="block truncate text-sm font-semibold text-sidebar-accent-foreground">{user.fullName}</span>
+                  <span className="block truncate text-xs text-sidebar-foreground/60">
+                    {t.shell.profileShort} · {t.roles[user.role]}
+                  </span>
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={signOut.ask}
+              title={t.shell.signOutShort}
+              aria-label={t.shell.signOutShort}
+              className={cn(
+                "tap flex min-h-11 w-full items-center justify-center gap-3 rounded-xl px-2 text-sm text-sidebar-foreground/80 transition-colors hover:bg-destructive/15 hover:text-destructive",
+                wide && "lg:justify-start lg:px-3",
+              )}
+            >
+              <LogOut className="h-4 w-4" />
+              {wide && <span className="hidden lg:inline">{t.shell.signOutShort}</span>}
+            </button>
+            {signOut.dialog}
+          </div>
+        )}
         <button
           onClick={toggleSidebar}
           aria-label={collapsed ? t.shell.expand : t.shell.collapse}

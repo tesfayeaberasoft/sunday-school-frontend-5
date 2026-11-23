@@ -14,6 +14,7 @@ import { DateField } from "@/components/common/DateField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ProfilePhoto } from "@/components/common/ProfilePhoto";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/common/AdaptiveDialog";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -38,6 +39,7 @@ function Page() {
   const classes = db.classes.filter(c => student ? c.id === student.classId : c.teacherIds.includes(user.id) || user.classIds?.includes(c.id));
   const w = t.workspace;
   return <RequirePerm perm="dashboard.view"><div className="space-y-5 min-w-0"><PageHeader title={w.profile} description={w.ownOnly}/>
+    <ProfilePhoto user={user}/>
     <Panel title={w.identity}><dl className="grid gap-4 sm:grid-cols-2">{[[t.labels.fullName,user.fullName],[t.roles[user.role],user.username],[t.labels.email,user.email],[t.labels.phone,user.phone],[w.department,db.departments.find(d=>d.id===user.departmentId)?.name ?? w.none]].map(([label,value],i)=><div key={i} className="min-w-0"><dt className="text-sm text-muted-foreground">{label}</dt><dd className="break-words font-medium">{value || w.none}</dd></div>)}</dl></Panel>
     {user.role === 'student' && !student && <EmptyState title={t.dashboard.noStudent}/>}
     {student && <Panel title={w.contact}><dl className="space-y-3">{[[w.address,student.address],[w.guardian,student.guardianName],[t.labels.phone,student.guardianPhone]].map(([k,v])=><div key={k}><dt className="text-sm text-muted-foreground">{k}</dt><dd className="break-words">{v || w.none}</dd></div>)}</dl></Panel>}

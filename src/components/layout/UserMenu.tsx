@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { CalendarDays, LogOut, RotateCcw, User as UserIcon, Users } from "lucide-react";
 import { toast } from "sonner";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,7 @@ import { unsyncedCount, useSyncQueue } from "@/lib/sync-queue";
 import { useAuth } from "@/stores/auth";
 import { useDb } from "@/stores/db";
 import { useUi } from "@/stores/ui";
-import { initials, uuid } from "@/lib/format";
+import { uuid } from "@/lib/format";
 import { t } from "@/i18n";
 
 export function useLogout() {
@@ -39,6 +39,33 @@ export function useLogout() {
     clear();
     void navigate({ to: "/" });
   };
+}
+
+export function useAskLogout() {
+  const items = useSyncQueue((s) => s.items);
+  const logout = useLogout();
+  const [warn, setWarn] = useState(false);
+  const pending = unsyncedCount(items);
+  const ask = () => (pending > 0 ? setWarn(true) : void logout());
+  const dialog = (
+    <AlertDialog open={warn} onOpenChange={setWarn}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t.shell.unsyncedWarnTitle}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t.shell.unsyncedWarnBody} ({t.shell.unsyncedCount}: {pending})
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="tap">{t.actions.cancel}</AlertDialogCancel>
+          <AlertDialogAction className="tap bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => void logout()}>
+            {t.shell.logoutAnyway}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+  return { ask, dialog };
 }
 
 export function UserMenu() {
@@ -62,9 +89,7 @@ export function UserMenu() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="tap flex items-center justify-center gap-2 rounded-full px-1 transition-colors hover:bg-obsidian-raised md:rounded-xl md:px-1.5" aria-label={t.nav.profile}>
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-gradient-brand text-sm font-semibold text-brand-foreground">{initials(user.fullName)}</AvatarFallback>
-            </Avatar>
+            <UserAvatar user={user} className="h-9 w-9" />
             <span className="hidden min-w-0 text-left leading-tight md:block">
               <span className="block max-w-36 truncate text-sm font-semibold text-navy-foreground">{user.fullName}</span>
               <span className="block max-w-36 truncate text-xs text-navy-foreground/60">{t.roles[user.role]}</span>
@@ -72,10 +97,13 @@ export function UserMenu() {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel className="font-normal">
+          <DropdownMenuLabel className="flex items-center gap-3 font-normal">
+            <UserAvatar user={user} className="h-11 w-11" />
+            <span className="min-w-0">
             <p className="text-xs text-muted-foreground">{t.shell.signedInAs}</p>
             <p className="truncate font-semibold text-navy">{user.fullName}</p>
             <p className="text-xs text-brand">{t.roles[user.role]}</p>
+            </span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild className="min-h-11">
@@ -144,9 +172,7 @@ export function UserMenu() {
                     className="tap flex w-full items-center gap-3 rounded-xl border p-2.5 text-left hover:border-brand hover:bg-brand/5 data-[current=true]:border-brand data-[current=true]:bg-brand/10"
                     data-current={u.id === user.id}
                   >
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback className="bg-navy/10 text-navy">{initials(u.fullName)}</AvatarFallback>
-                    </Avatar>
+                    <UserAvatar user={u} className="h-9 w-9" />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium text-navy">{u.fullName}</span>
                       <span className="block text-xs text-muted-foreground">{t.roles[u.role]}</span>

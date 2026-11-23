@@ -20,6 +20,8 @@ export interface User {
   classIds?: string[];
   lastLogin?: string;
   failedLogins: number;
+  /** Optional profile photo (small data URL stored on-device). */
+  photoUrl?: string | undefined;
   /** Set after an admin reset; the user must choose a new password at next sign-in. */
   mustChangePassword?: boolean;
   createdAt: string;

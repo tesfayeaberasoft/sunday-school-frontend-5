@@ -1,0 +1,66 @@
+import { useQuickDone, type Quick } from "@/components/quick/quick";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useDb } from "@/stores/db";
+import { useCan, useCurrentUser } from "@/hooks/use-session";
+import { RequirePerm } from "@/components/common/RequirePerm";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Panel } from "@/components/common/Panel";
+import { Field } from "@/components/common/Field";
+import { DateField } from "@/components/common/DateField";
+import { DateText } from "@/components/common/DateText";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/common/AdaptiveDialog";
+import { useEffect } from "react";
+import type { AttendanceRecord, AttendanceSession, AttendanceStatus } from "@/types/models";
+import { attendance as a } from "@/i18n/am/attendance";
+import { todayIso } from "@/lib/ethiopian-calendar";
+import { findSessionConflict, studentSummary, summarize } from "@/lib/rules/attendance";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { rowOpen } from "@/components/common/clickable";
+import { ChevronRight } from "lucide-react";
+import { submitOrQueue, useSyncQueue, type SyncPayload } from "@/lib/sync-queue";
+
+
+const selectStyle="tap min-h-11 w-full min-w-0 rounded-xl border bg-background px-3";
+const statuses:AttendanceStatus[]=["present","absent","late"];
+export function AttendancePage({quick}:{quick?:Quick}={}) {
+ const db=useDb();const user=useCurrentUser();const record=useCan("attendance.record");
+ const queue=useSyncQueue(); const [classId,setClassId]=useState(quick?.action.startsWith("record")?quick.action.split(":")[1]??"":"");const [recording,setRecording]=useState(!!quick?.action.startsWith("record"));const [date,setDate]=useState(todayIso);const [sessionName,setSessionName]=useState("");
+ const [marks,setMarks]=useState<Record<string,AttendanceStatus>>({});const [busy,setBusy]=useState(false);const [correction,setCorrection]=useState<AttendanceSession|null>(null);const [reason,setReason]=useState("");const [historyClass,setHistoryClass]=useState("");const [historyDate,setHistoryDate]=useState("");const [detailId,setDetailId]=useState<string|null>(null);
+ useEffect(()=>{void useSyncQueue.getState().load();},[]);
+ useQuickDone(quick,recording||!!detailId||!!correction);
+ const assigned=(id:string)=>db.classes.some(c=>c.id===id&&(c.teacherIds.includes(user?.id??"")||user?.classIds?.includes(id)));
+ const classes=db.classes.filter(c=>assigned(c.id)&&db.academicYears.some(y=>y.id===c.academicYearId&&y.status==="active"));
+ const cls=classes.find(c=>c.id===classId);
+ const roster=db.students.filter(st=>st.status==="active"&&st.enrollments.some(e=>e.classId===classId&&e.academicYearId===cls?.academicYearId&&e.status==="enrolled"));
+ const history=db.attendanceSessions.filter(x=>(user?.role==="student"?x.records.some(r=>r.studentId===user.studentId):user?.role!=="teacher"||assigned(x.classId))&&(!historyClass||x.classId===historyClass)&&(!historyDate||x.date===historyDate)).sort((x,y)=>y.date.localeCompare(x.date));
+ const detailSession=db.attendanceSessions.find(x=>x.id===detailId&&history.some(h=>h.id===x.id));
+ const openCorrection=(x:AttendanceSession)=>{setCorrection({...x,records:x.records.map(r=>({...r}))});setReason("");};
+ const own=user?.studentId?studentSummary(db.attendanceSessions,user.studentId):null;
+ const locked=Object.keys(marks).length>0;
+ const change=(action:()=>void)=>{if(locked){toast.error(a.unsaved);return;}action();};
+ const toggles=(id:string,value:AttendanceStatus|undefined,onChange:(status:AttendanceStatus)=>void)=><div className="flex flex-wrap gap-1" role="group" aria-label={db.students.find(st=>st.id===id)?.fullName??a.name}>{statuses.map(status=><Button type="button" key={status} className="tap min-h-11 px-3" variant={value===status?"default":"outline"} aria-pressed={value===status} onClick={()=>onChange(status)}>{a[status]}</Button>)}</div>;
+ async function submit(){
+ if(busy||!record||!cls||!assigned(classId)||!date||date>todayIso()||!db.settings.sessionNames.includes(sessionName)||!roster.length||roster.some(st=>!marks[st.id])){toast.error(a.invalid);return;}
+ const year=db.academicYears.find(y=>y.id===cls.academicYearId);if(!year||date<year.startDate||date>year.endDate){toast.error(a.invalid);return;}
+ const key={classId,academicYearId:cls.academicYearId,date,sessionName};
+ const queued=queue.items.some(item=>{if(item.kind!=="attendance"||item.status==="synced")return false;const p=item.payload as SyncPayload;return p.kind==="attendance"&&p.data.classId===classId&&p.data.date===date&&p.data.sessionName===sessionName;});
+ if(findSessionConflict(db.attendanceSessions,key)||queued){toast.error(a.conflict);return;}
+ setBusy(true);try{const records:AttendanceRecord[]=roster.map(st=>({studentId:st.id,status:marks[st.id]!}));const res=await submitOrQueue({kind:"attendance",data:{classId,date,sessionName,records}},`${a.title} — ${cls.name} — ${date}`);if(!res.ok){toast.error(res.conflict?a.conflict:res.error);return;}toast.success(res.queued?a.queued:a.success);setMarks({});if(quick)setRecording(false);}catch{toast.error(a.failed);}finally{setBusy(false);}
+ }
+ const recordForm=<><div className="grid gap-3 md:grid-cols-3"><Field label={a.class}><select disabled={busy} className={selectStyle} value={classId} onChange={e=>change(()=>setClassId(e.target.value))}><option value="">{a.select}</option>{classes.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field><Field label={a.date}><DateField value={date} onChange={v=>change(()=>setDate(v))}/></Field><Field label={a.session}><select disabled={busy} className={selectStyle} value={sessionName} onChange={e=>change(()=>setSessionName(e.target.value))}><option value="">{a.select}</option>{db.settings.sessionNames.map(n=><option key={n}>{n}</option>)}</select></Field></div>
+ <fieldset disabled={busy} className="mt-4 space-y-3"><legend className="mb-2">{a.markAll}</legend><div className="flex flex-wrap gap-2">{statuses.map(status=><Button type="button" key={status} className="tap" variant="outline" disabled={!roster.length} onClick={()=>setMarks(Object.fromEntries(roster.map(st=>[st.id,status])))}>{a[status]}</Button>)}<Button className="tap" variant="ghost" onClick={()=>setMarks({})}>{a.clear}</Button></div>
+ {!roster.length?<p>{a.empty}</p>:<><div className="space-y-3 md:hidden">{roster.map(st=><article key={st.id} className="space-y-2 rounded-xl border p-3"><p className="break-words font-medium">{st.fullName}</p>{toggles(st.id,marks[st.id],status=>setMarks(m=>({...m,[st.id]:status})))}</article>)}</div><table className="hidden w-full table-fixed text-left md:table"><thead><tr><th className="p-2">{a.name}</th><th className="p-2">{a.review}</th></tr></thead><tbody>{roster.map(st=><tr className="border-t" key={st.id}><td className="break-words p-2">{st.fullName}</td><td className="p-2">{toggles(st.id,marks[st.id],status=>setMarks(m=>({...m,[st.id]:status})))}</td></tr>)}</tbody></table></>}
+ <Button className="tap" disabled={busy||!roster.length||roster.some(st=>!marks[st.id])} onClick={()=>void submit()}>{a.submit}</Button></fieldset></>;
+ return <RequirePerm perm="attendance.view"><div className="min-w-0 space-y-5">{!quick&&<><PageHeader title={a.title} description={a.description}/>
+ {user?.role==="student"&&<Panel title={a.own}><div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{own&&statuses.map(status=><p key={status}>{a[status]}: {own[status]}</p>)}<p>{a.percent}: {Math.round(own?.percent??0)}%</p></div></Panel>}
+ {!quick&&record&&<Panel title={a.submit}>{recordForm}</Panel>}
+ <Panel title={a.history}><div className="mb-4 grid gap-3 sm:grid-cols-2"><Field label={a.class}><select className={selectStyle} value={historyClass} onChange={e=>setHistoryClass(e.target.value)}><option value="">{a.all}</option>{db.classes.filter(c=>user?.role!=="teacher"||assigned(c.id)).filter(c=>user?.role!=="student"||history.some(x=>x.classId===c.id)).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field><Field label={a.date}><DateField value={historyDate} onChange={setHistoryDate}/><Button className="tap" variant="ghost" onClick={()=>setHistoryDate("")}>{a.all}</Button></Field></div>
+ {!history.length?<p>{a.empty}</p>:<><p className="mb-3 text-xs text-muted-foreground">{a.openHint}</p><div className="grid grid-cols-1 gap-4 md:grid-cols-2">{history.map(x=>{const sum=summarize(x.records.map(r=>r.status));const cname=db.classes.find(c=>c.id===x.classId)?.name;const mine=user?.role==="student"?x.records.find(r=>r.studentId===user.studentId):undefined;return <article key={x.id} {...rowOpen(()=>setDetailId(x.id))} className="row-click flex min-w-0 flex-col gap-3 rounded-2xl border bg-card p-4 shadow-card hover:border-brand/40"><div className="flex min-w-0 items-start gap-2"><div className="min-w-0 flex-1"><p className="truncate font-semibold text-navy">{cname}</p><p className="flex flex-wrap gap-x-2 text-sm text-muted-foreground"><DateText iso={x.date}/><span>· {x.sessionName}</span></p></div><ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden/></div>{mine?<div className="flex items-center gap-2 text-sm"><span className="text-muted-foreground">{a.ownStatus}:</span><StatusBadge status={mine.status} label={a[mine.status]}/></div>:<><div className="flex flex-wrap gap-1.5">{statuses.map(st=><StatusBadge key={st} status={st} label={`${a[st]} ${sum[st]}`}/>)}</div><div className="flex items-center gap-2"><div className="h-2 flex-1 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-brand" style={{width:`${Math.round(sum.percent)}%`}}/></div><span className="text-xs font-semibold text-navy">{Math.round(sum.percent)}%</span></div></>}</article>;})}</div></>}</Panel></>}
+ {quick&&record&&recording&&<Dialog open onOpenChange={o=>{if(!o&&!busy)setRecording(false);}}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>{quick.title??a.submit}</DialogTitle><DialogDescription>{a.description}</DialogDescription></DialogHeader>{recordForm}</DialogContent></Dialog>}
+ {detailSession&&(()=>{const x=detailSession;const sum=summarize(x.records.map(r=>r.status));const own=user?.role==="student";const list=own?x.records.filter(r=>r.studentId===user?.studentId):x.records;return <Dialog open onOpenChange={o=>{if(!o)setDetailId(null);}}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>{db.classes.find(c=>c.id===x.classId)?.name} · {x.sessionName}</DialogTitle><DialogDescription><DateText iso={x.date} weekday/> · {a.sessionDetail}</DialogDescription></DialogHeader><div className="min-w-0 space-y-5">{!own&&<dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">{([[a.present,sum.present],[a.absent,sum.absent],[a.late,sum.late],[a.percent,`${Math.round(sum.percent)}%`]] as const).map(([k,v])=><div key={k} className="rounded-xl bg-muted p-3 text-center"><dt className="truncate text-[11px] text-muted-foreground">{k}</dt><dd className="font-display text-xl font-bold text-navy">{v}</dd></div>)}</dl>}<section className="space-y-2"><h3 className="text-sm font-semibold text-navy">{a.review} ({list.length})</h3><ul className="space-y-2">{list.map(r=><li key={r.studentId} className="flex min-w-0 items-center justify-between gap-3 rounded-xl border p-3"><span className="min-w-0 break-words text-sm text-navy">{db.students.find(st=>st.id===r.studentId)?.fullName??a.name}</span><StatusBadge status={r.status} label={a[r.status]}/></li>)}</ul></section>{record&&assigned(x.classId)&&<div className="flex justify-end border-t pt-4"><Button className="tap" onClick={()=>{setDetailId(null);openCorrection(x);}}>{a.correct}</Button></div>}</div></DialogContent></Dialog>;})()}
+ <Dialog open={!!correction} onOpenChange={o=>{if(!o)setCorrection(null);}}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>{a.correct}</DialogTitle><DialogDescription>{a.reasonRequired}</DialogDescription></DialogHeader>{correction&&record&&assigned(correction.classId)&&<form className="space-y-4" onSubmit={e=>{e.preventDefault();if(!reason.trim()){toast.error(a.reasonRequired);return;}if(typeof navigator!=="undefined"&&!navigator.onLine){toast.error(a.offlineCorrection);return;}db.correctAttendance(correction.id,correction.records,reason.trim());toast.success(a.success);setCorrection(null);}}>{correction.records.map(r=><article key={r.studentId} className="space-y-2 rounded-xl border p-3"><p>{db.students.find(st=>st.id===r.studentId)?.fullName??a.name}</p>{toggles(r.studentId,r.status,status=>setCorrection({...correction,records:correction.records.map(x=>x.studentId===r.studentId?{...x,status}:x)}))}</article>)}<Field label={a.reason} htmlFor="correction-reason"><Input id="correction-reason" className="tap" required value={reason} onChange={e=>setReason(e.target.value)}/></Field><Button type="submit" className="tap" disabled={!reason.trim()}>{a.submit}</Button></form>}</DialogContent></Dialog>
+ </div></RequirePerm>;
+}

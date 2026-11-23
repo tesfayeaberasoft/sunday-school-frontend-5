@@ -1,0 +1,31 @@
+# SSMS Roadmap
+
+- [x] Design system, fonts (ported from archive)
+- [x] Core libs: Ethiopian calendar, Amharic search, ETB format, permissions, i18n
+- [x] Data types, mock data, store + business rules
+- [x] Logo, favicon/manifest
+- [x] App shell: sidebar, bottom nav, topbar, role switcher, online/offline + sync queue drawer
+- [x] `/api/v1` service (src/services/api.ts) with local mock adapter + IndexedDB sync queue
+- [x] Login page (/) and role dashboards
+- [x] Students & classes (registration, import preview, promotion)
+- [x] Attendance
+- [x] Finance (ledger, reversal/adjustment, transfers, contributions, reconciliation)
+- [x] Assets & inventory
+- [x] Departments, development, mezmur & arts
+- [x] Events, tasks, announcements, notifications
+- [x] Reports & administration (users, academic years, settings, audit, backup)
+- [x] Tests for business rules
+- [x] Use school name ቅዱስ ሚካአል ሰንበት ትምህርት ቤት
+- [x] Data stays on-device sample data; PHP backend later
+- [x] Blend the supplied church photo into the login page with subtle motion and accessible mobile controls
+- [x] Verify the photo, login controls, and layout on phone, tablet, and desktop
+- [x] Option 4 palette: white cards on off-white canvas, obsidian sidebar/top bar/table headers, amber-orange accents
+- [x] Modal-first: forms, student profile and filters open as modals (desktop) / bottom sheets (phone)
+- [x] Android-style phone shell (bottom nav, More sheet, FAB, 48px taps) + tablet icon rail + desktop sidebar
+- [x] Merge System Administrator role into School Manager (remove admin role)
+- [x] Students: whole row/card clickable → detail modal with suspend/reactivate + reset password
+- [x] Admin: hide student accounts & student role from Users; clickable rows → detail modals for users, academic years, settings
+- [x] Attendance history: 2-column grid, clickable session cards → detail modal
+- [x] Global audit: clickable rows/cards → detail modals on remaining pages
+- [ ] Dashboard quick actions open their forms in modals on top of the dashboard (all roles)
+- [ ] Compact rows (3–4 columns) everywhere; full details + actions move into the row's detail modal

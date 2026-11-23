@@ -1,0 +1,17 @@
+{
+  "source": "code-archive (sunday_school.zip, Lovable TanStack Start project, same template revision)",
+  "capabilities": [
+    {"capability": "code", "source": "src/ routes, components, i18n, rules, stores, services", "outcome": "port as-is (CRLF normalized to LF)", "status": "in_progress", "next_action": "copy into project and build"},
+    {"capability": "schema", "source": "none: data lives in on-device zustand store seeded from src/data/mock.ts (earlier user decision: PHP backend later)", "outcome": "preserve on-device store", "status": "pending_decision", "next_action": "user chooses on-device vs Lovable Cloud"},
+    {"capability": "records", "source": "sample data in src/data/mock.ts; no server database exists", "outcome": "ported with code", "status": "in_progress", "next_action": "verify after port"},
+    {"capability": "auth identities", "source": "mock login against sample users with shared demo password", "outcome": "preserve demo login", "status": "pending_decision", "next_action": "real accounts only if user moves to Lovable Cloud"},
+    {"capability": "authorization", "source": "can(role, permission) + RequirePerm", "outcome": "port as-is", "status": "in_progress", "next_action": "verify via tests and pages"},
+    {"capability": "uploaded file bytes", "source": "login photo asset pointer owned by old project + public/church-fallback.jpg", "outcome": "re-upload photo as asset of this project", "status": "in_progress", "next_action": "create new asset pointer"},
+    {"capability": "external providers", "source": "optional VITE_API_BASE_URL for future PHP /api/v1 server (unset)", "outcome": "preserve adapter", "status": "in_progress", "next_action": "none beyond port"},
+    {"capability": "public endpoints/callbacks/webhooks/schedules", "source": "none detected", "outcome": "n/a", "status": "verified", "next_action": "none"},
+    {"capability": "secrets", "source": "none required", "outcome": "n/a", "status": "verified", "next_action": "none"},
+    {"capability": "offline sync queue", "source": "IndexedDB queue (idb-keyval)", "outcome": "port as-is", "status": "in_progress", "next_action": "verify after port"},
+    {"capability": "cutover", "source": "old project", "outcome": "none needed (no live server data)", "status": "verified", "next_action": "none"},
+    {"capability": "verification", "source": "build, tests, login + key pages", "outcome": "run", "status": "pending", "next_action": "run after port"}
+  ]
+}

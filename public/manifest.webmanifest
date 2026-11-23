@@ -1,0 +1,10 @@
+{
+  "name": "ቅዱስ ሚካአል ሰንበት ትምህርት ቤት — አስተዳደር",
+  "short_name": "ሰ.ት.ቤ",
+  "lang": "am",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090A0D",
+  "theme_color": "#F97316",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

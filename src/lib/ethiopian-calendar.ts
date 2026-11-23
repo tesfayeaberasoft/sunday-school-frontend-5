@@ -122,6 +122,16 @@ export function ethToIso(e: EthDate): string {
   return `${g.year}-${String(g.month).padStart(2, "0")}-${String(g.day).padStart(2, "0")}`;
 }
 
+/** Teaching ends on Nehase 30; Pagume belongs to the calendar year, not the teaching term. */
+export function academicYearDates(year: number) {
+  return {
+    startDate: ethToIso({ year, month: 1, day: 1 }),
+    endDate: ethToIso({ year, month: 12, day: 30 }),
+    pagumeStartDate: ethToIso({ year, month: 13, day: 1 }),
+    calendarEndDate: ethToIso({ year, month: 13, day: daysInEthMonth(year, 13) }),
+  };
+}
+
 export function weekdayOf(iso: string): number {
   const g = parseIsoDate(iso);
   return new Date(Date.UTC(g.year, g.month - 1, g.day)).getUTCDay();

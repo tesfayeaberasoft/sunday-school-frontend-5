@@ -41,3 +41,4 @@ use the editor.
 - Phone layout (<768px) uses the bottom nav + "More" sheet in `AppShell`, `Fab` for the page's primary create action, `FilterBar` for filters and `Records` for list data (table on tablet/desktop, touch cards on phones), so new pages get the native-app pattern for free.
 - List rows/cards open their detail via `rowOpen` (`@/components/common/clickable`) and the `row-click` utility; `Records` rows and `Panel` accept `onOpen` (Records falls back to a built-in detail + actions modal), so inner checkboxes/buttons keep working without per-page `stopPropagation`.
 - Account rules (staff-only user list, temp passwords, suspend/role-change protection) live in `src/lib/rules/accounts.ts` so the future backend can mirror them.
+- Domain defaults are dictionary-backed and class validation lives in pure rules; versioned on-device upgrades preserve recorded marks, financial amounts, stock quantities, and internal role IDs instead of reseeding.

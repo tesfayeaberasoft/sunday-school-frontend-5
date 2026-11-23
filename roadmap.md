@@ -1,5 +1,7 @@
 # SSMS Roadmap
 
+- [ ] Apply six Sunday School domain updates and verify saved-data upgrades and regression tests
+
 - [x] Design system, fonts (ported from archive)
 - [x] Core libs: Ethiopian calendar, Amharic search, ETB format, permissions, i18n
 - [x] Data types, mock data, store + business rules

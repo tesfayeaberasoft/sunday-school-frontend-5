@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/common/AdaptiveDialog";
 import { formatETB } from "@/lib/format";
-import { todayIso } from "@/lib/ethiopian-calendar";
+import { todayIso, isoToEth, academicYearDates } from "@/lib/ethiopian-calendar";
 import { ACCENT } from "@/lib/accent";
 import { downloadCsv } from "@/lib/export";
 
@@ -62,7 +62,7 @@ import { t } from "@/i18n";
 import { matchesAny } from "@/lib/amharic-search";
 import type { Role } from "@/types/models";
 
-const roles: [string,string][] = STAFF_ROLES.map(r=>[r,c[r]]);
+const roles: [string,string][] = STAFF_ROLES.map(r=>[r,t.roles[r]]);
 type EditorState = { kind: 'add' } | { kind: 'settings'; focus?: string } | { kind: 'user'; id: string } | { kind: 'year'; id: string };
 export function AdminPage({quick}:{quick?:Quick}={}) {
  const db=useDb();const user=useCurrentUser();const users=useCan('admin.users');const years=useCan('admin.years');const settings=useCan('admin.settings');const audit=useCan('admin.audit');
@@ -84,7 +84,9 @@ export function AdminPage({quick}:{quick?:Quick}={}) {
  const editingUser=editor?.kind==='user'?db.users.find(u=>u.id===editor.id):undefined;
  const editingYear=editor?.kind==='year'?db.academicYears.find(y=>y.id===editor.id):undefined;
  const editorKind=editor?.kind==='add'?tab:editor?.kind;
- const initial:Values=editingUser?{fullName:editingUser.fullName,email:editingUser.email,phone:editingUser.phone,role:editingUser.role}:editingYear?{name:editingYear.name,startDate:editingYear.startDate,endDate:editingYear.endDate}:editorKind==='users'?{username:'',fullName:'',email:'',phone:'',role:'teacher',active:'true'}:editorKind==='years'?{name:'',startDate:todayIso(),endDate:todayIso()}:editorKind==='settings'?{schoolName:db.settings.schoolName,expenseThreshold:String(db.settings.expenseThreshold),monthlyContribution:String(db.settings.monthlyContribution),sessionNames:db.settings.sessionNames.join(', '),defaultCalendar:db.settings.defaultCalendar,defaultLanguage:db.settings.defaultLanguage}:{confirmation:''};
+ const nextYear=Math.max(isoToEth(todayIso()).year,...db.academicYears.map(y=>isoToEth(y.startDate).year))+1;
+ const yearDefaults=academicYearDates(nextYear);
+ const initial:Values=editingUser?{fullName:editingUser.fullName,email:editingUser.email,phone:editingUser.phone,role:editingUser.role}:editingYear?{name:editingYear.name,startDate:editingYear.startDate,endDate:editingYear.endDate}:editorKind==='users'?{username:'',fullName:'',email:'',phone:'',role:'teacher',active:'true'}:editorKind==='years'?{name:'',startDate:yearDefaults.startDate,endDate:yearDefaults.endDate}:editorKind==='settings'?{schoolName:db.settings.schoolName,expenseThreshold:String(db.settings.expenseThreshold),monthlyContribution:String(db.settings.monthlyContribution),sessionNames:db.settings.sessionNames.join(', '),defaultCalendar:db.settings.defaultCalendar,defaultLanguage:db.settings.defaultLanguage}:{confirmation:''};
  const fields:Spec[]=editingUser?[f('fullName',c.fullName),f('email',c.email,'email',true),f('phone',c.phone,'tel',true),{key:'role',label:c.role,options:roles}]:editingYear?[f('name',c.name),f('startDate',c.startDate,'date'),f('endDate',c.endDate,'date')]:editorKind==='users'?[f('username',c.username),f('fullName',c.fullName),f('email',c.email,'email',true),f('phone',c.phone,'tel',true),{key:'role',label:c.role,options:roles},{key:'active',label:c.status,options:[['true',c.active],['false',c.inactive]]}]:editorKind==='years'?[f('name',c.name),f('startDate',c.startDate,'date'),f('endDate',c.endDate,'date')]:editorKind==='settings'?settingFields:[f('confirmation',c.confirmation)];
  const editorTitle=editingUser?c.editUser:editingYear?c.editYear:editorKind==='settings'?c.edit:editorKind==='demo'?c.resetDemo:c.add;
  const save=(v:Values):boolean=>{

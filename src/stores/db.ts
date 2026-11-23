@@ -1,4 +1,6 @@
 import { generateTempPassword } from "@/lib/rules/accounts";
+import { upgradeSchoolDomain } from "@/lib/rules/domain-migration";
+import { canSaveClass } from "@/lib/rules/school-domain";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import * as seed from "@/data/mock";
@@ -268,6 +270,7 @@ export function migrateDbData(persisted: unknown, version: number): DbData {
       );
     }
   }
+  if (version < 3) upgradeSchoolDomain(data);
   return data as DbData;
 }
 
@@ -438,10 +441,13 @@ export const useDb = create<DbState>()(
         },
         addClass: (c) => {
           const cls: SchoolClass = { ...c, id: uuid() };
+          if (!canSaveClass(get().classes, cls)) return;
           set((s) => ({ classes: [...s.classes, cls] }));
           audit("ክፍሎች", "መፍጠር", "ክፍል", cls.id, cls.name);
         },
         updateClass: (id, patch) => {
+          const current = get().classes.find(c => c.id === id);
+          if (!current || !canSaveClass(get().classes, { ...current, ...patch })) return;
           set((s) => ({ classes: s.classes.map((c) => (c.id === id ? { ...c, ...patch } : c)) }));
           audit("ክፍሎች", "ማሻሻል", "ክፍል", id, get().classes.find((c) => c.id === id)?.name ?? "");
         },
@@ -788,8 +794,8 @@ export const useDb = create<DbState>()(
     },
     {
       name: "ssms-db-v1",
-      version: 2,
-      // v2: the System Administrator role was merged into School Manager.
+      version: 3,
+      // v3 upgrades Sunday School domain defaults without resetting recorded data.
       migrate: (persisted, version) => migrateDbData(persisted, version),
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => {

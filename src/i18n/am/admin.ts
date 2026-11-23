@@ -1,10 +1,12 @@
+import { common } from "./common";
+
 export const admin = {
   "title": "አስተዳደርና ቅንብሮች",
   "departments": "መምሪያዎች",
   "departmentsHint": "መምሪያዎች፣ መሪዎችና አባላት",
-  "development": "የልማት አባል",
+  "development": common.roles.development,
   "developmentHint": "የልማት ፕሮጀክቶች፣ በጀትና ሂደት",
-  "mezmur": "የመዝሙር አሰልጣኝ",
+  "mezmur": common.roles.mezmur,
   "mezmurHint": "መዝሙሮች፣ ልምምድና የጥበብ ዝግጅቶች",
   "reports": "ሪፖርቶች",
   "reportsHint": "በማጣሪያ የተዘጋጁ ማጠቃለያዎችና ውሂብ ማውጣት",
@@ -71,7 +73,7 @@ export const admin = {
   "rehearsing": "በልምምድ ላይ",
   "done": "የተጠናቀቀ",
   "attendance": "ክትትል",
-  "finance": "የፋይናንስ ኃላፊ",
+  "finance": common.roles.finance,
   "assets": "ንብረቶች",
   "students": "ተማሪዎች",
   "exportCsv": "ወደ ሲኤስቪ ላክ",
@@ -152,8 +154,8 @@ export const admin = {
   "selfProtect": "የራስዎን ወይም የመጨረሻውን ንቁ የትምህርት ቤት ሥራ አስኪያጅ መለያ ማገድ አይቻልም።",
   "activateWarning": "ይህን ዘመን ማንቃት የአሁኑን ንቁ ዘመን ይዘጋል።",
   "closeYearHint": "ንቁ ዘመንን ለመዝጋት መጀመሪያ ሌላ ዘመን ያንቁ።",
-  "manager": "ሥራ አስኪያጅ",
-  "asset": "የንብረት ኃላፊ",
+  "manager": common.roles.manager,
+  "asset": common.roles.asset,
   "teacher": "መምህር",
   "student": "ተማሪ",
   "more": "ተጨማሪ አሳይ",
@@ -191,8 +193,8 @@ export const admin = {
   "yearActions": "የዘመኑ እርምጃዎች",
   "closeConfirm": "ይህን ዘመን መዝጋት ይፈልጋሉ? የተዘጋ ዘመን ዳግም አይከፈትም።",
   "permModules": {
-    "dashboard": "ዳሽቦርድ", "students": "ተማሪዎች", "classes": "ክፍሎች", "attendance": "ክትትል", "finance": "ፋይናንስ",
-    "assets": "ንብረት", "departments": "መምሪያዎች", "development": "ልማት", "mezmur": "መዝሙርና ጥበባት", "events": "በዓላትና ዝግጅቶች",
+    "dashboard": "ዳሽቦርድ", "students": "ተማሪዎች", "classes": "ክፍሎች", "attendance": "ክትትል", "finance": common.roles.finance,
+    "assets": "ንብረት", "departments": "መምሪያዎች", "development": common.roles.development, "mezmur": common.roles.mezmur, "events": "በዓላትና ዝግጅቶች",
     "tasks": "ተግባራት", "announcements": "ማስታወቂያዎች", "reports": "ሪፖርቶች", "admin": "አስተዳደርና ቅንብሮች"
   }
 };

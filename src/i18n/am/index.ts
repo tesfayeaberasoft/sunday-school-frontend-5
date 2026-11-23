@@ -7,6 +7,7 @@ import { assets } from "./assets";
 import { community } from "./community";
 import { events } from "./events";
 import { admin } from "./admin";
+import { domain } from "./domain";
 
 export const am = {
   ...common,
@@ -18,4 +19,5 @@ export const am = {
   community,
   events,
   admin,
+  domain,
 };

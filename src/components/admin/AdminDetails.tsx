@@ -53,6 +53,7 @@ export function UserDetail({ id, onClose, onEdit }: { id: string; onClose: () =>
           </div>
           <DetailGrid
             items={[
+              [c.roleTitle, t.roleTitles[u.role]],
               [c.email, u.email],
               [c.phone, u.phone],
               [c.departmentId, db.departments.find((d) => d.id === u.departmentId)?.name],
@@ -129,6 +130,7 @@ export function YearDetail({ id, onClose, onEdit }: { id: string; onClose: () =>
         <div className="min-w-0 space-y-5">
           <StatusBadge status={y.status} label={label} />
           <DetailGrid items={[[c.startDate, <DateText key="s" iso={y.startDate} />], [c.endDate, <DateText key="e" iso={y.endDate} />], [c.durationDays, String(days)]]} />
+          <p className="text-sm text-muted-foreground">{t.domain.academicYearNote}</p>
           <dl className="grid grid-cols-3 gap-2">
             {([[c.classesCount, classes.length], [c.enrolledCount, enrolled], [c.sessionsCount, sessions]] as const).map(([k, v]) => (
               <div key={k} className="rounded-xl bg-muted p-3 text-center">

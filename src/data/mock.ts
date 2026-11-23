@@ -30,6 +30,9 @@ import type {
   User,
 } from "@/types/models";
 import { computeBalance } from "@/lib/rules/finance";
+import { academicYearDates } from "@/lib/ethiopian-calendar";
+import { TEACHING_WEEKDAYS } from "@/lib/rules/school-domain";
+import { t } from "@/i18n";
 
 export const SCHOOL_NAME = "ቅዱስ ሚካኤል ሰንበት ትምህርት ቤት";
 export const DEMO_PASSWORD = "1234";
@@ -49,9 +52,9 @@ const rand = rng(20261122);
 const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)] as T;
 
 export const academicYears: AcademicYear[] = [
-  { id: "ay-2018", name: "2018 ዓ.ም", startDate: "2025-09-11", endDate: "2026-07-07", status: "closed" },
-  { id: "ay-2019", name: "2019 ዓ.ም", startDate: "2026-09-11", endDate: "2027-07-07", status: "active" },
-  { id: "ay-2020", name: "2020 ዓ.ም", startDate: "2027-09-12", endDate: "2028-07-07", status: "planned" },
+  { id: "ay-2018", name: "2018 ዓ.ም", startDate: academicYearDates(2018).startDate, endDate: academicYearDates(2018).endDate, status: "closed" },
+  { id: "ay-2019", name: "2019 ዓ.ም", startDate: academicYearDates(2019).startDate, endDate: academicYearDates(2019).endDate, status: "active" },
+  { id: "ay-2020", name: "2020 ዓ.ም", startDate: academicYearDates(2020).startDate, endDate: academicYearDates(2020).endDate, status: "planned" },
 ];
 
 export const users: User[] = [
@@ -59,22 +62,21 @@ export const users: User[] = [
   { id: "u-finance", username: "finance", fullName: "ዳዊት አለማየሁ", email: "finance@kidusmikael.org", phone: "0913456789", role: "finance", active: true, failedLogins: 1, lastLogin: "2026-11-20T16:05:00", createdAt: "2025-08-03" },
   { id: "u-asset", username: "asset", fullName: "መሠረት ታደሰ", email: "asset@kidusmikael.org", phone: "0914567890", role: "asset", active: true, failedLogins: 0, lastLogin: "2026-11-19T10:12:00", createdAt: "2025-08-03" },
   { id: "u-teacher", username: "teacher", fullName: "ቀሲስ ሰሎሞን በቀለ", email: "solomon@kidusmikael.org", phone: "0915678901", role: "teacher", active: true, classIds: ["c-1", "c-2"], failedLogins: 0, lastLogin: "2026-11-15T08:01:00", createdAt: "2025-08-05" },
-  { id: "u-teacher2", username: "birhanu", fullName: "ብርሃኑ ወልደ ማርያም", email: "birhanu@kidusmikael.org", phone: "0916789012", role: "teacher", active: true, classIds: ["c-3", "c-4"], failedLogins: 3, lastLogin: "2026-11-15T08:10:00", createdAt: "2025-08-05" },
-  { id: "u-teacher3", username: "fasika", fullName: "ፋሲካ ኃይሌ", email: "fasika@kidusmikael.org", phone: "0917890123", role: "teacher", active: true, classIds: ["c-5", "c-6"], failedLogins: 0, lastLogin: "2026-11-15T08:05:00", createdAt: "2025-08-06" },
+  { id: "u-teacher2", username: "birhanu", fullName: "ብርሃኑ ወልደ ማርያም", email: "birhanu@kidusmikael.org", phone: "0916789012", role: "teacher", active: true, classIds: ["c-2", "c-3"], failedLogins: 3, lastLogin: "2026-11-15T08:10:00", createdAt: "2025-08-05" },
+  { id: "u-teacher3", username: "fasika", fullName: "ፋሲካ ኃይሌ", email: "fasika@kidusmikael.org", phone: "0917890123", role: "teacher", active: true, classIds: ["c-3"], failedLogins: 0, lastLogin: "2026-11-15T08:05:00", createdAt: "2025-08-06" },
   { id: "u-dev", username: "development", fullName: "ኤልያስ ገበየሁ", email: "elias@kidusmikael.org", phone: "0918901234", role: "development", departmentId: "d-dev", active: true, failedLogins: 0, lastLogin: "2026-11-18T19:30:00", createdAt: "2025-08-10" },
   { id: "u-mezmur", username: "mezmur", fullName: "ማርታ ደምሴ", email: "marta@kidusmikael.org", phone: "0919012345", role: "mezmur", departmentId: "d-mezmur", active: true, failedLogins: 0, lastLogin: "2026-11-21T15:45:00", createdAt: "2025-08-10" },
   { id: "u-student", username: "student", fullName: "ሚካኤል ተስፋዬ", email: "michael.s@kidusmikael.org", phone: "0920123456", role: "student", studentId: "s-1", active: true, failedLogins: 0, lastLogin: "2026-11-21T20:00:00", createdAt: "2026-09-15" },
   { id: "u-old", username: "abebe", fullName: "አበበ ከበደ", email: "abebe@kidusmikael.org", phone: "0921234567", role: "teacher", active: false, classIds: [], failedLogins: 5, createdAt: "2024-09-01" },
 ];
 
-export const classes: SchoolClass[] = [
-  { id: "c-1", name: "ሕፃናት ክፍል ሀ", level: "ከ5–8 ዓመት", academicYearId: "ay-2019", teacherIds: ["u-teacher"], room: "ክፍል 1", schedule: "እሑድ 2:00–4:00", color: "gold" },
-  { id: "c-2", name: "ሕፃናት ክፍል ለ", level: "ከ9–12 ዓመት", academicYearId: "ay-2019", teacherIds: ["u-teacher"], room: "ክፍል 2", schedule: "እሑድ 2:00–4:00", color: "orange" },
-  { id: "c-3", name: "ታዳጊዎች ክፍል", level: "ከ13–15 ዓመት", academicYearId: "ay-2019", teacherIds: ["u-teacher2"], room: "ክፍል 3", schedule: "እሑድ 4:00–6:00", color: "teal" },
-  { id: "c-4", name: "ወጣቶች ክፍል ሀ", level: "ከ16–18 ዓመት", academicYearId: "ay-2019", teacherIds: ["u-teacher2"], room: "አዳራሽ ሀ", schedule: "እሑድ 4:00–6:00", color: "brand" },
-  { id: "c-5", name: "ወጣቶች ክፍል ለ", level: "ከ19–25 ዓመት", academicYearId: "ay-2019", teacherIds: ["u-teacher3"], room: "አዳራሽ ለ", schedule: "ቅዳሜ 8:00–10:00", color: "rose" },
-  { id: "c-6", name: "ጎልማሶች ክፍል", level: "ከ26 ዓመት በላይ", academicYearId: "ay-2019", teacherIds: ["u-teacher3"], room: "ዋና አዳራሽ", schedule: "ቅዳሜ 10:00–12:00", color: "lime" },
-];
+export const sessionNames = [...t.domain.sessions];
+
+export const classes: SchoolClass[] = t.domain.classes.map((c, i) => ({
+  id: `c-${i + 1}`, ...c, academicYearId: "ay-2019",
+  teacherIds: i === 0 ? ["u-teacher"] : i === 1 ? ["u-teacher", "u-teacher2"] : ["u-teacher2", "u-teacher3"],
+  room: `ክፍል ${i + 1}`, schedule: sessionNames.join("፣ "), color: ["gold", "orange", "brand"][i] ?? "brand",
+}));
 
 const MALE = ["ሚካኤል", "ዳንኤል", "ናትናኤል", "ዮናታን", "አቤል", "ሳሙኤል", "ኢዮብ", "በረከት", "ሔኖክ", "ኪሩቤል", "ቢንያም", "ያሬድ"] as const;
 const FEMALE = ["ማርታ", "ሣራ", "ቤተልሔም", "ሕይወት", "ሩት", "ኤደን", "ሜሮን", "ቅድስት", "ፀጋ", "ሐና", "ትዕግሥት", "ማኅሌት"] as const;
@@ -83,14 +85,14 @@ const CHRISTIAN_M = ["ወልደ ሚካኤል", "ገብረ ማርያም", "ኃይ
 const CHRISTIAN_F = ["ወለተ ማርያም", "ወለተ ጊዮርጊስ", "ኪዳነ ማርያም", "ወለተ ሥላሴ", "ወለተ ሚካኤል", "አመተ ማርያም"] as const;
 const AREAS = ["ቦሌ፣ ወረዳ 03", "ቦሌ፣ ወረዳ 06", "የካ፣ ወረዳ 11", "ቂርቆስ፣ ወረዳ 02", "ለሚ ኩራ፣ ወረዳ 08", "አቃቂ ቃሊቲ፣ ወረዳ 05"] as const;
 const RELATIONS = ["አባት", "እናት", "አጎት", "አክስት", "ታላቅ ወንድም", "ታላቅ እህት"] as const;
-const BIRTH_YEAR_BY_CLASS: Record<string, number> = { "c-1": 2019, "c-2": 2015, "c-3": 2012, "c-4": 2009, "c-5": 2004, "c-6": 1992 };
+const BIRTH_YEAR_BY_CLASS: Record<string, number> = { "c-1": 2017, "c-2": 2014, "c-3": 2005 };
 
 export const students: Student[] = Array.from({ length: 48 }, (_, i) => {
   const female = i % 2 === 1;
   const first = female ? FEMALE[(i * 5) % FEMALE.length] : MALE[(i * 7) % MALE.length];
   const father = FATHERS[(i * 3 + Math.floor(i / 12)) % FATHERS.length];
-  const classId = `c-${(i % 6) + 1}`;
-  const by = (BIRTH_YEAR_BY_CLASS[classId] ?? 2010) + (i % 3);
+  const classId = `c-${(i % 3) + 1}`;
+  const by = (BIRTH_YEAR_BY_CLASS[classId] ?? 2010) + (Math.floor(i / 3) % 2);
   const n = String(i + 1).padStart(3, "0");
   const isNew = i >= 42;
   return {
@@ -113,27 +115,25 @@ export const students: Student[] = Array.from({ length: 48 }, (_, i) => {
     enrollments: isNew
       ? [{ academicYearId: "ay-2019", classId, status: "enrolled" }]
       : [
-          { academicYearId: "ay-2018", classId: `c-${Math.max(1, (i % 6))}`, status: "promoted" },
+          { academicYearId: "ay-2018", classId: `c-${Math.max(1, (i % 3))}`, status: "promoted" },
           { academicYearId: "ay-2019", classId, status: "enrolled" },
         ],
   } satisfies Student;
 });
 
-export const sessionNames = ["የእሑድ ጠዋት", "የእሑድ ከሰዓት", "የቅዳሜ መርሐ ግብር"];
-
-const SUNDAYS = ["2026-09-13", "2026-09-20", "2026-09-27", "2026-10-04", "2026-10-11", "2026-10-18", "2026-10-25", "2026-11-01", "2026-11-08", "2026-11-15"];
+const TEACHING_DATES = ["2026-09-13", "2026-09-15", "2026-09-17", "2026-09-19", "2026-09-20", "2026-10-06", "2026-10-08", "2026-10-10", "2026-11-08", "2026-11-10", "2026-11-12", "2026-11-14", "2026-11-15"];
 
 export const attendanceSessions: AttendanceSession[] = classes.flatMap((c) =>
-  SUNDAYS.map((date, wi) => {
+  TEACHING_DATES.map((date, wi) => {
     const teacher = c.teacherIds[0] ?? "u-teacher";
     return {
       id: `att-${c.id}-${date}`,
       classId: c.id,
       academicYearId: "ay-2019",
       date,
-      sessionName: sessionNames[0] ?? "የእሑድ ጠዋት",
+      sessionName: sessionNames[TEACHING_WEEKDAYS.indexOf(new Date(`${date}T12:00:00Z`).getUTCDay() as 0 | 2 | 4 | 6)] ?? t.domain.sessions[3] ?? "",
       recordedBy: teacher,
-      createdAt: `${date}T09:30:00`,
+      createdAt: `${date}T${new Date(`${date}T12:00:00Z`).getUTCDay() === 0 ? "09:30" : "15:30"}:00`,
       records: students
         .filter((s) => s.classId === c.id && s.status === "active")
         .map((s) => {
@@ -152,11 +152,7 @@ export const accounts: Account[] = [
 ];
 
 export const financeCategories: FinanceCategory[] = [
-  { id: "fc-contrib", name: "የአባላት ወርሃዊ መዋጮ", kind: "income", color: "success" },
-  { id: "fc-festival", name: "የበዓል ገቢ", kind: "income", color: "gold" },
-  { id: "fc-ticket", name: "የበዓል ትኬት ሽያጭ", kind: "income", color: "orange" },
-  { id: "fc-donation", name: "ስጦታና ልገሳ", kind: "income", color: "teal" },
-  { id: "fc-sales", name: "የመጻሕፍትና ዕቃዎች ሽያጭ", kind: "income", color: "sky" },
+  ...["fc-contrib", "fc-ticket", "fc-festival", "fc-donation", "fc-sales", "fc-development"].map((id, i) => ({ id, name: t.domain.incomeSources[i] ?? "", kind: "income" as const, color: ["success", "orange", "gold", "teal", "sky", "lime"][i] ?? "brand" })),
   { id: "fc-edu", name: "የትምህርት መርጃ መሣሪያዎች", kind: "expense", color: "brand" },
   { id: "fc-fest-exp", name: "የበዓል ዝግጅት", kind: "expense", color: "rose" },
   { id: "fc-repair", name: "ጥገና", kind: "expense", color: "orange" },
@@ -187,6 +183,7 @@ const txSeeds: TxSeed[] = [
   { id: "t-18", type: "Expense", accountId: "acc-cash", categoryId: "fc-edu", amount: 640, date: "2026-11-19", description: "ለሕፃናት የስዕል ቀለሞች", paymentMethod: "cash", receiptNo: "ወ-0008", status: "Pending" },
   { id: "t-19", type: "Expense", accountId: "acc-awash", categoryId: "fc-project", amount: 7200, date: "2026-11-20", description: "የድምፅ ማጉያ ቅድመ ክፍያ", paymentMethod: "cheque", receiptNo: "ወ-0009", status: "Pending", projectId: "p-instruments" },
   { id: "t-20", type: "Expense", accountId: "acc-cash", categoryId: "fc-office", amount: 2300, date: "2026-11-11", description: "ያልተረጋገጠ የሻይ ቡና ወጪ", paymentMethod: "cash", status: "Rejected", rejectReason: "ደረሰኝ አልቀረበም" },
+  { id: "t-22", type: "Income", accountId: "acc-awash", categoryId: "fc-development", amount: 4200, date: "2026-11-21", description: "ከልማት ሥራዎች ሽያጭ", paymentMethod: "cash", receiptNo: "ደ-0009", status: "Verified" },
   { id: "t-21", type: "Income", accountId: "acc-awash", categoryId: "fc-donation", amount: 15000, date: "2026-11-05", description: "ለመዝሙር መሣሪያዎች ፕሮጀክት ልገሳ", paymentMethod: "bank_transfer", receiptNo: "ደ-0008", status: "Verified", projectId: "p-instruments" },
 ];
 
@@ -213,42 +210,35 @@ export const contributions: Contribution[] = students
     return out;
   });
 
-export const assetCategories: AssetCategory[] = [
-  { id: "ac-books", name: "ቅዱሳት መጻሕፍት", color: "gold" },
-  { id: "ac-instr", name: "የመዝሙር መሣሪያዎች", color: "rose" },
-  { id: "ac-cloth", name: "የበዓል አልባሳት", color: "brand" },
-  { id: "ac-uniform", name: "ዩኒፎርም", color: "teal" },
-  { id: "ac-furn", name: "የቤት ዕቃዎች", color: "orange" },
-  { id: "ac-sound", name: "የድምፅ መሣሪያዎች", color: "sky" },
-];
+export const assetCategories: AssetCategory[] = ["ac-books", "ac-instr", "ac-cloth", "ac-sound", "ac-begena", "ac-furn"].map((id, i) => ({ id, name: t.domain.assetCategories[i] ?? "", color: ["gold", "rose", "brand", "sky", "teal", "orange"][i] ?? "brand" }));
 
 export const assets: Asset[] = [
   { id: "a-1", code: "ንብ-001", name: "መጽሐፈ ዳዊት", categoryId: "ac-books", totalQuantity: 60, damagedQuantity: 3, condition: "good", location: "ቤተ መጻሕፍት", unitValue: 350, acquiredDate: "2024-10-10", notes: "" },
   { id: "a-2", code: "ንብ-002", name: "ውዳሴ ማርያም ከአንቀጸ ብርሃን", categoryId: "ac-books", totalQuantity: 80, damagedQuantity: 0, condition: "new", location: "ቤተ መጻሕፍት", unitValue: 180, acquiredDate: "2026-10-02", notes: "" },
   { id: "a-3", code: "ንብ-003", name: "ከበሮ", categoryId: "ac-instr", totalQuantity: 12, damagedQuantity: 2, condition: "fair", location: "የመዝሙር ክፍል", unitValue: 4500, acquiredDate: "2023-09-15", notes: "ሁለቱ ቆዳ መቀየር ያስፈልጋቸዋል" },
-  { id: "a-4", code: "ንብ-004", name: "ጸናጽል", categoryId: "ac-instr", totalQuantity: 30, damagedQuantity: 1, condition: "good", location: "የመዝሙር ክፍል", unitValue: 600, acquiredDate: "2024-01-20", notes: "" },
-  { id: "a-5", code: "ንብ-005", name: "መቋሚያ", categoryId: "ac-instr", totalQuantity: 40, damagedQuantity: 0, condition: "good", location: "የመዝሙር ክፍል", unitValue: 450, acquiredDate: "2024-01-20", notes: "" },
-  { id: "a-6", code: "ንብ-006", name: "የመዘምራን ነጭ ልብስ", categoryId: "ac-cloth", totalQuantity: 70, damagedQuantity: 4, condition: "good", location: "የአልባሳት ማከማቻ", unitValue: 1200, acquiredDate: "2026-11-10", notes: "ለኅዳር ጽዮን የተሰፋ" },
-  { id: "a-7", code: "ንብ-007", name: "ካባ (የበዓል)", categoryId: "ac-cloth", totalQuantity: 25, damagedQuantity: 0, condition: "good", location: "የአልባሳት ማከማቻ", unitValue: 2500, acquiredDate: "2025-01-05", notes: "" },
-  { id: "a-8", code: "ንብ-008", name: "የተማሪዎች ዩኒፎርም (ሰማያዊ)", categoryId: "ac-uniform", totalQuantity: 120, damagedQuantity: 6, condition: "good", location: "ማከማቻ 2", unitValue: 650, acquiredDate: "2025-09-01", notes: "" },
-  { id: "a-9", code: "ንብ-009", name: "የፕላስቲክ ወንበር", categoryId: "ac-furn", totalQuantity: 150, damagedQuantity: 9, condition: "fair", location: "ዋና አዳራሽ", unitValue: 400, acquiredDate: "2022-06-01", notes: "" },
-  { id: "a-10", code: "ንብ-010", name: "የሚታጠፍ ጠረጴዛ", categoryId: "ac-furn", totalQuantity: 20, damagedQuantity: 1, condition: "good", location: "ዋና አዳራሽ", unitValue: 2200, acquiredDate: "2023-03-10", notes: "" },
-  { id: "a-11", code: "ንብ-011", name: "ድምፅ ማጉያ (ስፒከር)", categoryId: "ac-sound", totalQuantity: 4, damagedQuantity: 0, condition: "good", location: "የድምፅ ክፍል", unitValue: 18000, acquiredDate: "2024-04-12", notes: "" },
-  { id: "a-12", code: "ንብ-012", name: "ገመድ አልባ ማይክሮፎን", categoryId: "ac-sound", totalQuantity: 6, damagedQuantity: 1, condition: "fair", location: "የድምፅ ክፍል", unitValue: 5500, acquiredDate: "2024-04-12", notes: "" },
+  { id: "a-4", code: "ንብ-004", name: "መጽሐፍ ቅዱስ", categoryId: "ac-books", totalQuantity: 30, damagedQuantity: 1, condition: "good", location: "የመዝሙር ክፍል", unitValue: 600, acquiredDate: "2024-01-20", notes: "" },
+  { id: "a-5", code: "ንብ-005", name: "በገናዎች", categoryId: "ac-begena", totalQuantity: 40, damagedQuantity: 0, condition: "good", location: "የመዝሙር ክፍል", unitValue: 450, acquiredDate: "2024-01-20", notes: "" },
+  { id: "a-6", code: "ንብ-006", name: "የተማሪዎች ለበዓል የሚለብሱት አልባሳት (ነጭ)", categoryId: "ac-cloth", totalQuantity: 70, damagedQuantity: 4, condition: "good", location: "የአልባሳት ማከማቻ", unitValue: 1200, acquiredDate: "2026-11-10", notes: "ለኅዳር ጽዮን የተሰፋ" },
+  { id: "a-7", code: "ንብ-007", name: "የተማሪዎች ለበዓል የሚለብሱት አልባሳት (ቀይ)", categoryId: "ac-cloth", totalQuantity: 25, damagedQuantity: 0, condition: "good", location: "የአልባሳት ማከማቻ", unitValue: 2500, acquiredDate: "2025-01-05", notes: "" },
+  { id: "a-8", code: "ንብ-008", name: "የተማሪዎች ለበዓል የሚለብሱት አልባሳት (ሰማያዊ)", categoryId: "ac-cloth", totalQuantity: 120, damagedQuantity: 6, condition: "good", location: "ማከማቻ 2", unitValue: 650, acquiredDate: "2025-09-01", notes: "" },
+  { id: "a-9", code: "ንብ-009", name: "የማስተማሪያ ሰሌዳዎች (ጥቁር)", categoryId: "ac-furn", totalQuantity: 150, damagedQuantity: 9, condition: "fair", location: "ዋና አዳራሽ", unitValue: 400, acquiredDate: "2022-06-01", notes: "" },
+  { id: "a-10", code: "ንብ-010", name: "የማስተማሪያ ሰሌዳዎች (ነጭ)", categoryId: "ac-furn", totalQuantity: 20, damagedQuantity: 1, condition: "good", location: "ዋና አዳራሽ", unitValue: 2200, acquiredDate: "2023-03-10", notes: "" },
+  { id: "a-11", code: "ንብ-011", name: "ድምፅ ማጉያ ስፒከር", categoryId: "ac-sound", totalQuantity: 4, damagedQuantity: 0, condition: "good", location: "የድምፅ ክፍል", unitValue: 18000, acquiredDate: "2024-04-12", notes: "" },
+  { id: "a-12", code: "ንብ-012", name: "ድምፅ ማጉያ ስፒከር (ተንቀሳቃሽ)", categoryId: "ac-sound", totalQuantity: 6, damagedQuantity: 1, condition: "fair", location: "የድምፅ ክፍል", unitValue: 5500, acquiredDate: "2024-04-12", notes: "" },
 ];
 
 export const assetIssues: AssetIssue[] = [
   { id: "ai-1", assetId: "a-6", quantity: 45, recipientName: "የመዘምራን ቡድን (በማርታ ደምሴ)", recipientType: "member", issueDate: "2026-11-18", dueDate: "2026-12-02", returnedQuantity: 0, damagedOnReturn: 0, missingOnReturn: 0, status: "issued", eventId: "ev-hidar-tsion", note: "ለኅዳር ጽዮን" },
   { id: "ai-2", assetId: "a-3", quantity: 4, recipientName: "የመዘምራን ቡድን (በማርታ ደምሴ)", recipientType: "member", issueDate: "2026-11-01", dueDate: "2026-11-15", returnedQuantity: 1, damagedOnReturn: 0, missingOnReturn: 0, returnDate: "2026-11-15", status: "partial", note: "ለሳምንታዊ ልምምድ" },
   { id: "ai-3", assetId: "a-1", quantity: 1, recipientName: "ዳንኤል አበበ", recipientType: "student", recipientId: "s-3", issueDate: "2026-10-05", dueDate: "2026-11-05", returnedQuantity: 0, damagedOnReturn: 0, missingOnReturn: 0, status: "issued", note: "" },
-  { id: "ai-4", assetId: "a-8", quantity: 30, recipientName: "ሕፃናት ክፍል ሀ ተማሪዎች", recipientType: "member", issueDate: "2026-09-20", dueDate: "2027-07-01", returnedQuantity: 0, damagedOnReturn: 0, missingOnReturn: 0, status: "issued", note: "ለዓመቱ" },
+  { id: "ai-4", assetId: "a-8", quantity: 30, recipientName: "ሕፃናት ክፍል (5–10) ተማሪዎች", recipientType: "member", issueDate: "2026-09-20", dueDate: "2027-07-01", returnedQuantity: 0, damagedOnReturn: 0, missingOnReturn: 0, status: "issued", note: "ለዓመቱ" },
   { id: "ai-5", assetId: "a-7", quantity: 10, recipientName: "የመስቀል በዓል አስተባባሪዎች", recipientType: "member", issueDate: "2026-09-24", dueDate: "2026-09-30", returnedQuantity: 9, damagedOnReturn: 1, missingOnReturn: 0, returnDate: "2026-09-30", status: "returned", eventId: "ev-meskel", note: "" },
   { id: "ai-6", assetId: "a-12", quantity: 2, recipientName: "ሔኖክ ደምሴ", recipientType: "student", recipientId: "s-9", issueDate: "2026-11-08", dueDate: "2026-11-12", returnedQuantity: 0, damagedOnReturn: 0, missingOnReturn: 0, status: "issued", note: "ለወጣቶች ጉባኤ" },
 ];
 
 export const assetMaintenance: AssetMaintenance[] = [
   { id: "am-1", assetId: "a-3", quantity: 2, description: "የከበሮ ቆዳ መቀየር", cost: 1800, date: "2026-10-12", vendor: "መርካቶ የባህል መሣሪያዎች", status: "in_progress" },
-  { id: "am-2", assetId: "a-12", quantity: 1, description: "የባትሪ ክፍል ጥገና", cost: 600, date: "2026-09-28", vendor: "ኤሌክትሮ ቴክ", status: "completed" },
+  { id: "am-2", assetId: "a-12", quantity: 1, description: "የተንቀሳቃሽ ስፒከር ባትሪ ጥገና", cost: 600, date: "2026-09-28", vendor: "ኤሌክትሮ ቴክ", status: "completed" },
 ];
 
 export const eventAllocations: EventAllocation[] = [
@@ -259,8 +249,8 @@ export const eventAllocations: EventAllocation[] = [
 
 export const departments: Department[] = [
   { id: "d-edu", name: "ትምህርትና ሥልጠና ክፍል", description: "የክፍል ትምህርቶችን፣ የመምህራን ሥልጠናና የሥርዓተ ትምህርት ዝግጅትን ያስተባብራል።", leaderName: "ቀሲስ ሰሎሞን በቀለ", color: "brand", icon: "book" },
-  { id: "d-mezmur", name: "መዝሙርና ሥነ ጥበብ ክፍል", description: "የመዝሙር ጥናት፣ የመዘምራን ልምምድ፣ ድራማና ሥነ ጽሑፍ ያዘጋጃል።", leaderName: "ማርታ ደምሴ", color: "rose", icon: "music" },
-  { id: "d-dev", name: "ልማትና ገቢ ማሰባሰቢያ ክፍል", description: "የልማት ፕሮጀክቶችን ያቅዳል፣ ገቢ ያሰባስባል፣ ሂደታቸውንም ይከታተላል።", leaderName: "ኤልያስ ገበየሁ", color: "lime", icon: "sprout" },
+  { id: "d-mezmur", name: "የመዝሙር እና ኪነ ጥበብ ክፍል", description: "የመዝሙር ጥናት፣ የመዘምራን ልምምድ፣ ድራማና ሥነ ጽሑፍ ያዘጋጃል።", leaderName: "ማርታ ደምሴ", color: "rose", icon: "music" },
+  { id: "d-dev", name: "የልማት ክፍል", description: "የልማት ፕሮጀክቶችን ያቅዳል፣ ገቢ ያሰባስባል፣ ሂደታቸውንም ይከታተላል።", leaderName: "ኤልያስ ገበየሁ", color: "lime", icon: "sprout" },
   { id: "d-charity", name: "በጎ አድራጎትና ማኅበራዊ ክፍል", description: "አቅመ ደካሞችን መርዳትና የማኅበራዊ አገልግሎት ሥራዎችን ያስተባብራል።", leaderName: "ሕይወት ታደሰ", color: "teal", icon: "heart" },
   { id: "d-pr", name: "ሕዝብ ግንኙነትና ሚዲያ ክፍል", description: "ማስታወቂያዎችን፣ ፎቶግራፍና የማኅበራዊ ሚዲያ ሥራዎችን ይመራል።", leaderName: "ናትናኤል ጌታቸው", color: "orange", icon: "megaphone" },
 ];
@@ -316,8 +306,8 @@ export const mezmurs: Mezmur[] = [
 ];
 
 export const practiceSchedules: PracticeSchedule[] = [
-  { id: "ps-1", title: "ለኅዳር ጽዮን የመዘምራን ልምምድ", date: "2026-11-24", startTime: "11:00", endTime: "1:00", location: "ዋና አዳራሽ", mezmurIds: ["m-6", "m-2"], trainer: "ማርታ ደምሴ" },
-  { id: "ps-2", title: "የከበሮ ልምምድ", date: "2026-11-26", startTime: "11:30", endTime: "1:00", location: "የመዝሙር ክፍል", mezmurIds: ["m-1"], trainer: "ያሬድ ሙሉጌታ" },
+  { id: "ps-1", title: "ለኅዳር ጽዮን የመዘምራን ልምምድ", date: "2026-11-24", startTime: "8:00", endTime: "10:00", location: "ዋና አዳራሽ", mezmurIds: ["m-6", "m-2"], trainer: "ማርታ ደምሴ" },
+  { id: "ps-2", title: "የከበሮ ልምምድ", date: "2026-11-26", startTime: "8:00", endTime: "10:00", location: "የመዝሙር ክፍል", mezmurIds: ["m-1"], trainer: "ያሬድ ሙሉጌታ" },
   { id: "ps-3", title: "የገና መዝሙር ዝግጅት", date: "2026-12-05", startTime: "8:00", endTime: "10:00", location: "ዋና አዳራሽ", mezmurIds: ["m-7"], trainer: "ማርታ ደምሴ" },
   { id: "ps-4", title: "የሕፃናት መዝሙር ልምምድ", date: "2026-11-15", startTime: "4:00", endTime: "5:00", location: "ክፍል 1", mezmurIds: ["m-5"], trainer: "ማኅሌት ሽፈራው" },
 ];
@@ -351,7 +341,7 @@ export const tasks: Task[] = [
 
 export const announcements: Announcement[] = [
   { id: "an-1", title: "የኅዳር ጽዮን ጉዞ ምዝገባ", body: "ወደ አክሱም ለሚደረገው የኅዳር ጽዮን ጉዞ ምዝገባ እስከ ኅዳር 16 ቀን ድረስ በቢሮ ይከናወናል። የትኬት ዋጋ 600 ብር ነው።", priority: "urgent", targetType: "all", targetIds: [], authorId: "u-manager", authorName: "ሔለን ገብረ ሥላሴ", createdAt: "2026-11-18T09:00:00", readBy: ["u-manager"] },
-  { id: "an-2", title: "የመዘምራን ልምምድ ሰዓት ለውጥ", body: "የሰኞ የመዘምራን ልምምድ ከ11፡00 ጀምሮ ይካሄዳል። ሁሉም መዘምራን በሰዓቱ እንዲገኙ።", priority: "normal", targetType: "department", targetIds: ["d-mezmur"], authorId: "u-mezmur", authorName: "ማርታ ደምሴ", departmentId: "d-mezmur", createdAt: "2026-11-20T15:30:00", readBy: [] },
+  { id: "an-2", title: "የመዘምራን ልምምድ ሰዓት ለውጥ", body: "የማክሰኞ ከሰዓት የመዘምራን ልምምድ ከ8፡00 ጀምሮ ይካሄዳል። ሁሉም መዘምራን በሰዓቱ እንዲገኙ።", priority: "normal", targetType: "department", targetIds: ["d-mezmur"], authorId: "u-mezmur", authorName: "ማርታ ደምሴ", departmentId: "d-mezmur", createdAt: "2026-11-20T15:30:00", readBy: [] },
   { id: "an-3", title: "የሩብ ዓመት ፈተና ፕሮግራም", body: "የሕፃናት ክፍሎች የሩብ ዓመት ፈተና ኅዳር 27 ቀን ይሰጣል። ወላጆች ልጆቻችሁን እንድታዘጋጁ።", priority: "normal", targetType: "class", targetIds: ["c-1", "c-2"], authorId: "u-manager", authorName: "ሔለን ገብረ ሥላሴ", createdAt: "2026-11-16T10:00:00", readBy: ["u-teacher"] },
   { id: "an-4", title: "የወርሃዊ መዋጮ ማስታወሻ", body: "የኅዳር ወር መዋጮ 50 ብር ያልከፈላችሁ አባላት እስከ ወሩ መጨረሻ በገንዘብ ያዥ በኩል እንድትከፍሉ እናሳስባለን።", priority: "normal", targetType: "role", targetIds: ["student"], authorId: "u-manager", authorName: "ሔለን ገብረ ሥላሴ", createdAt: "2026-11-12T08:00:00", readBy: [] },
   { id: "an-5", title: "የልማት ክፍል ስብሰባ", body: "የቤተ መጻሕፍት ፕሮጀክት ግምገማ ስብሰባ ቅዳሜ ከቀኑ 8፡00 ይካሄዳል።", priority: "normal", targetType: "department", targetIds: ["d-dev"], authorId: "u-dev", authorName: "ኤልያስ ገበየሁ", departmentId: "d-dev", createdAt: "2026-11-19T18:00:00", readBy: [] },
@@ -361,12 +351,12 @@ export const announcements: Announcement[] = [
 export const notifications: AppNotification[] = [
   { id: "n-1", role: "manager", title: "ከገደብ በላይ ወጪ ተመዝግቧል", body: "18,500.00 ብር — ለኅዳር ጽዮን የመዘምራን ነጭ ልብስ ስፌት", kind: "warning", createdAt: "2026-11-10T16:00:00", read: false, link: "/finance" },
   { id: "n-2", role: "finance", title: "4 ግብይቶች ማረጋገጫ ይጠብቃሉ", body: "እባክዎ ደረሰኞቹን አይተው ያረጋግጡ ወይም ውድቅ ያድርጉ።", kind: "info", createdAt: "2026-11-20T17:00:00", read: false, link: "/finance" },
-  { id: "n-3", role: "asset", title: "የተመላሽ ጊዜ አልፏል", body: "ገመድ አልባ ማይክሮፎን (2) — ሔኖክ ደምሴ", kind: "danger", createdAt: "2026-11-13T08:00:00", read: false, link: "/assets" },
-  { id: "n-4", role: "teacher", title: "የዛሬ ክትትል አልተመዘገበም", body: "ሕፃናት ክፍል ሀ እና ለ — የእሑድ ጠዋት", kind: "warning", createdAt: "2026-11-22T08:00:00", read: false, link: "/attendance" },
+  { id: "n-3", role: "asset", title: "የተመላሽ ጊዜ አልፏል", body: "ድምፅ ማጉያ ስፒከር (ተንቀሳቃሽ) (2) — ሔኖክ ደምሴ", kind: "danger", createdAt: "2026-11-13T08:00:00", read: false, link: "/assets" },
+  { id: "n-4", role: "teacher", title: "የዛሬ ክትትል አልተመዘገበም", body: "ሕፃናት ክፍል (5–10) እና ማዕከላውያን ክፍል (10–13) — እሁድ ጠዋት", kind: "warning", createdAt: "2026-11-22T08:00:00", read: false, link: "/attendance" },
   { id: "n-5", role: "manager", title: "ምትኬ በተሳካ ሁኔታ ተጠናቋል", body: "የዕለቱ ራስ-ሰር ምትኬ ተወስዷል።", kind: "success", createdAt: "2026-11-22T02:00:00", read: true, link: "/admin" },
   { id: "n-6", role: "manager", title: "ተደጋጋሚ ያልተሳካ መግቢያ", body: "birhanu — 3 ያልተሳኩ ሙከራዎች", kind: "danger", createdAt: "2026-11-21T21:10:00", read: false, link: "/admin" },
   { id: "n-7", role: "student", title: "አዲስ መዝሙር ታትሟል", body: "ጽዮን ማርያም — የበዓል መዝሙር", kind: "info", createdAt: "2026-11-01T12:00:00", read: false, link: "/mezmur" },
-  { id: "n-8", role: "mezmur", title: "የልምምድ ማስታወሻ", body: "ለኅዳር ጽዮን የመዘምራን ልምምድ ሰኞ 11፡00", kind: "info", createdAt: "2026-11-21T09:00:00", read: false, link: "/mezmur" },
+  { id: "n-8", role: "mezmur", title: "የልምምድ ማስታወሻ", body: "ለኅዳር ጽዮን የመዘምራን ልምምድ ማክሰኞ ከሰዓት", kind: "info", createdAt: "2026-11-21T09:00:00", read: false, link: "/mezmur" },
   { id: "n-9", role: "development", title: "የፕሮጀክት ሂደት ሪፖርት ይጠበቃል", body: "የመዝሙር መሣሪያዎች ግዢ — ሳምንታዊ ሪፖርት", kind: "info", createdAt: "2026-11-20T09:00:00", read: false, link: "/development" },
 ];
 
@@ -378,8 +368,8 @@ const AUDIT_SEEDS: Array<[string, string, string, string, string, string, string
   ["u-finance", "ዳዊት አለማየሁ", "ፋይናንስ", "መቀልበስ", "ግብይት", "t-10", "ግብ-0010 ተቀለበሰ — ደረሰኙ በስህተት ሁለት ጊዜ ተመዝግቧል"],
   ["u-finance", "ዳዊት አለማየሁ", "ፋይናንስ", "ውድቅ ማድረግ", "ግብይት", "t-20", "ግብ-0020 ውድቅ ተደረገ — ደረሰኝ አልቀረበም"],
   ["u-asset", "መሠረት ታደሰ", "ንብረት", "መስጠት", "ንብረት", "a-6", "45 የመዘምራን ነጭ ልብስ ተሰጠ"],
-  ["u-asset", "መሠረት ታደሰ", "ንብረት", "መመለስ", "ንብረት", "a-7", "9 ካባ ተመለሰ፣ 1 ተበላሽቷል"],
-  ["u-teacher", "ቀሲስ ሰሎሞን በቀለ", "ክትትል", "መመዝገብ", "ክትትል", "att-c-1-2026-11-15", "ሕፃናት ክፍል ሀ — የእሑድ ጠዋት"],
+  ["u-asset", "መሠረት ታደሰ", "ንብረት", "መመለስ", "ንብረት", "a-7", "9 ቀይ የበዓል አልባሳት ተመለሱ፣ 1 ተበላሽቷል"],
+  ["u-teacher", "ቀሲስ ሰሎሞን በቀለ", "ክትትል", "መመዝገብ", "ክትትል", "att-c-1-2026-11-15", "ሕፃናት ክፍል (5–10) — እሁድ ጠዋት"],
   ["u-manager", "ሔለን ገብረ ሥላሴ", "ቅንብሮች", "ማሻሻል", "ቅንብር", "expense_threshold", "የወጪ ግምገማ ገደብ 5,000 ብር ተደረገ"],
   ["u-manager", "ሔለን ገብረ ሥላሴ", "የትምህርት ዘመን", "ማንቃት", "የትምህርት ዘመን", "ay-2019", "2019 ዓ.ም ንቁ ሆነ"],
   ["u-manager", "ሔለን ገብረ ሥላሴ", "ተጠቃሚዎች", "ማገድ", "ተጠቃሚ", "u-old", "የአበበ ከበደ መለያ ታገደ"],
